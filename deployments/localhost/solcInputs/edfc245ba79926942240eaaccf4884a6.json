@@ -1,0 +1,38 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Lock.sol": {
+      "content": "// SPDX-License-Identifier: UNLICENSED\npragma solidity ^0.8.9;\n\n// Uncomment this line to use console.log\n// import \"hardhat/console.sol\";\n\ncontract Lock {\n    uint public unlockTime;\n    address payable public owner;\n\n    event Withdrawal(uint amount, uint when);\n\n    constructor(uint _unlockTime) payable {\n        require(\n            block.timestamp < _unlockTime,\n            \"Unlock time should be in the future\"\n        );\n\n        unlockTime = _unlockTime;\n        owner = payable(msg.sender);\n    }\n\n    function withdraw() public {\n        // Uncomment this line, and the import of \"hardhat/console.sol\", to print a log in your terminal\n        // console.log(\"Unlock time is %o and block timestamp is %o\", unlockTime, block.timestamp);\n\n        require(block.timestamp >= unlockTime, \"You can't withdraw yet\");\n        require(msg.sender == owner, \"You aren't the owner\");\n\n        emit Withdrawal(address(this).balance, block.timestamp);\n\n        owner.transfer(address(this).balance);\n    }\n}\n"
+    },
+    "contracts/simple-contract.sol": {
+      "content": "// SPDX-License-Identifier: GPL-3.0\r\npragma solidity >=0.7.0 <0.9.0;\r\n\r\ncontract simpleContract {\r\n    address public owner = msg.sender;\r\n\r\n    /*The purpose of mapping ties the sender of ETH to their address \r\n    so our contracts know who sent the ETH and stores it*/\r\n    mapping(address => uint) balances;\r\n\r\n    function deposit() public payable {\r\n        balances[msg.sender] += msg.value;\r\n    }\r\n\r\n    //receive() external payable {}\r\n\r\n    function withDraw(uint _amount) public {\r\n        require(\r\n            balances[msg.sender] >= _amount,\r\n            \"error ,, insufficient amount\"\r\n        );\r\n        balances[msg.sender] -= _amount;\r\n        (bool sent, ) = msg.sender.call{value: _amount}(\"send\");\r\n        require(sent, \"Failed to Complete\");\r\n    }\r\n\r\n    function getBalance() public view returns (uint) {\r\n        return address(this).balance;\r\n    }\r\n\r\n    function Kill() public {\r\n        require(msg.sender == owner, \"you are not owner\");\r\n        selfdestruct(payable(msg.sender));\r\n    }\r\n}\r\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": false,
+      "runs": 200
+    },
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}
